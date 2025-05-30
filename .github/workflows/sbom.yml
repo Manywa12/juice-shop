@@ -2,27 +2,28 @@ name: Generate SBOM
 
 on:
   push:
-    branches: 
-     - master
+    branches:
+      - master
 
 jobs:
   generate-sbom:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Install CycloneDX Node Module
-        run: npm install -g @cyclonedx/bom
-
-      - name: Install dependencies
-        run: npm install
+      - name: Install CycloneDX CLI
+        run: |
+          curl -LO https://github.com/CycloneDX/cyclonedx-cli/releases/latest/download/cyclonedx-linux-x64
+          chmod +x cyclonedx-linux-x64
+          sudo mv cyclonedx-linux-x64 /usr/local/bin/cyclonedx
 
       - name: Generate SBOM
-        run: cyclonedx-bom -o sbom.json
+        run: cyclonedx --output-format json --output bom.json
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
         with:
           name: sbom
-          path: sbom.json
+          path: bom.json
